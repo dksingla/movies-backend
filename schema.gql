@@ -21,14 +21,21 @@ type LoginResponse {
   movies: [Movie!]!
 }
 
+type MoviePaginatedResponse {
+  movies: [Movie!]!
+  total: Int!
+  totalPages: Int!
+}
+
 type Query {
   user(email: String!): User
-  getmovies: [Movie!]!
+  getmovies(page: Int! = 1): MoviePaginatedResponse!
   getmovie(id: Int!): Movie!
 }
 
 type Mutation {
   addMovieToUser(userId: Int!, movieId: Int!): User!
   login(email: String!, password: String!): LoginResponse!
-  createMovie(title: String!, year: Int!): Movie!
+  createMovie(title: String!, year: Int!, link: String!, userId: Int!): Movie!
+  editMovie(id: Int!, title: String, year: Int, link: String): Movie!
 }

@@ -4,8 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Movie } from './movie.entity';
 import { UsersService } from '../users/users.service';
-import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class MoviesService {
@@ -15,36 +13,52 @@ export class MoviesService {
     private usersService: UsersService, // Inject UsersService
   ) {}
 
-  async findAll(): Promise<Movie[]> {
-    return this.moviesRepository.find();
+  async findAll(page: number = 1): Promise<{ movies: Movie[], total: number, totalPages: number }> {
+    const take = 8;
+    const skip = (page - 1) * take;
+
+    const [movies, total] = await this.moviesRepository.findAndCount({
+      skip,
+      take,
+      order: { id: 'ASC' },
+      
+    });
+
+    const totalPages = Math.ceil(total / take);
+
+    return { movies, total, totalPages };
   }
 
   async findOne(id: number): Promise<Movie> {
     return this.moviesRepository.findOne({ where: { id } });
   }
 
-  async create(title: string, year: number, jpgFile: Express.Multer.File, userId: number): Promise<Movie> {
-    const uniqueFilename = `${Date.now()}-${jpgFile.originalname}`;
-    const filePath = path.join(__dirname, '..', '..', 'uploads', uniqueFilename);
-  
-    return new Promise((resolve, reject) => {
-      fs.writeFile(filePath, jpgFile.buffer, async (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          const movie = this.moviesRepository.create({
-            title,
-            year,
-            jpgFilePath: `/uploads/${uniqueFilename}`
-          });
-          const savedMovie = await this.moviesRepository.save(movie);
-          
-          // Associate the movie with the user
-          await this.usersService.addMovieToUser(userId, savedMovie.id);
-          
-          resolve(savedMovie);
-        }
-      });
+  async create(title: string, year: number, jpgLink: string, userId: number): Promise<Movie> {
+    const movie = this.moviesRepository.create({
+        title,
+        year,
+        jpgFilePath: jpgLink
     });
+    const savedMovie = await this.moviesRepository.save(movie);
+    
+    // Associate the movie with the user
+    await this.usersService.addMovieToUser(userId, savedMovie.id);
+    
+    return savedMovie;
+}
+async edit(id: number, title: string, year: number, jpgLink: string): Promise<Movie> {
+    const movie = await this.findOne(id);
+    
+    if (title !== undefined) {
+        movie.title = title;
+      }
+      if (year !== undefined) {
+        movie.year = year;
+      }
+      if (jpgLink !== undefined) {
+        movie.jpgFilePath = jpgLink;
+      }
+
+    return this.moviesRepository.save(movie);
   }
 }
