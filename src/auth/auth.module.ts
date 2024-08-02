@@ -8,7 +8,6 @@ import { AuthResolver } from './auth.resolver';
 import { UsersModule } from '../users/users.module';
 import { MoviesModule } from '../movies/movie.module';
 import { jwtConstants } from './constants';
-
 @Module({
   imports: [
     UsersModule,
