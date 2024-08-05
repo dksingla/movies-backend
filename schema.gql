@@ -36,6 +36,4 @@ type Query {
 type Mutation {
   addMovieToUser(userId: Int!, movieId: Int!): User!
   login(email: String!, password: String!): LoginResponse!
-  createMovie(title: String!, year: Int!, link: String!, userId: Int!): Movie!
-  editMovie(id: Int!, title: String, year: Int, link: String): Movie!
 }
