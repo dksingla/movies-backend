@@ -29,7 +29,7 @@ import {
           .addFileTypeValidator({
             fileType: /(jpg|jpeg|png|gif)$/,
           })
-          .addMaxSizeValidator({ maxSize: 3000000 })
+          .addMaxSizeValidator({ maxSize: 500000 })
           .build({
             errorHttpStatusCode: 400,
           }),
@@ -50,7 +50,7 @@ import {
           .addFileTypeValidator({
             fileType: /(jpg|jpeg|png|gif)$/, // Allow common image types
           })
-          .addMaxSizeValidator({ maxSize: 3000000 }) // Limit to 1MB
+          .addMaxSizeValidator({ maxSize: 500000 }) // Limit to 1MB
           .build({
             errorHttpStatusCode: 400, // Customize error status code
           }),

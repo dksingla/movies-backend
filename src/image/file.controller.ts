@@ -17,9 +17,9 @@ import {
       @Res() res: Response,
     ) {
       const filePath = join(process.cwd(),'uploads', filename); // Path to uploads directory
-      console.log("file path",filePath)
+      // console.log("file path",filePath)
       const fileStream = createReadStream(filePath);
-      console.log("stream",fileStream)
+      // console.log("stream",fileStream)
       fileStream.pipe(res) 
   
     }
