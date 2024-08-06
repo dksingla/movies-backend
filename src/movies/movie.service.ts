@@ -4,18 +4,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Movie } from './movie.entity';
 import { UsersService } from '../users/users.service';
-import * as fs from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid'; // Import uuid for unique file names
-
+import cloudinary from '../config/config.module'// Import Cloudinary
 
 @Injectable()
 export class MoviesService {
+ 
   constructor(
     @InjectRepository(Movie)
     private moviesRepository: Repository<Movie>,
-    private usersService: UsersService, // Inject UsersService
-  ) {}
+    private usersService: UsersService,
+) {}
 
   async findAll(page: number = 1): Promise<{ movies: Movie[], total: number, totalPages: number }> {
     const take = 8;
@@ -37,57 +35,60 @@ export class MoviesService {
   }
 
   async create(title: string, year: number, file: Express.Multer.File, userId: number): Promise<Movie> {
-    const jpgFilePath = await this.saveFile(file); 
-
-    // Extract just the filename using string manipulation
-    const filename = jpgFilePath.split('/').pop() || jpgFilePath; 
+    const jpgFilePath = await this.uploadFileToCloudinary(file); // Upload to Cloudinary
 
     const movie = this.moviesRepository.create({
-      title,
-      year,
-      jpgFilePath: filename,
+        title,
+        year,
+        jpgFilePath: jpgFilePath, // Store the Cloudinary URL
     });
 
     const savedMovie = await this.moviesRepository.save(movie);
-
     // Associate the movie with the user
     await this.usersService.addMovieToUser(userId, savedMovie.id);
 
     return savedMovie;
-  }
+}
+
 
   async edit(id: number, title?: string, year?: number, file?: Express.Multer.File): Promise<Movie> {
     const movie = await this.findOne(id);
-    const filePath = await this.saveFile(file); 
-    const filename = filePath.split('/').pop() || filePath; 
+
+    if (file) {
+      const filePath = await this.uploadFileToCloudinary(file); // Upload new file to Cloudinary
+      movie.jpgFilePath = filePath; // Update with Cloudinary URL
+    }
 
     if (title !== undefined) {
-      movie.title = title;
+      movie.title = title; // Update title if provided
     }
     if (year !== undefined) {
-      movie.year = year;
-    }
-    if (file) {
-      movie.jpgFilePath = filename
+      movie.year = year; // Update year if provided
     }
 
-    return this.moviesRepository.save(movie);
+    return this.moviesRepository.save(movie); // Save updated movie
   }
 
-  private async saveFile(file: Express.Multer.File): Promise<string> {
-    const uploadDir = path.join(__dirname, '..', '..', 'uploads'); // Define the upload directory
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir); // Create uploads directory if it does not exist
-    }
-
-    const fileName = `${uuidv4()}-${file.originalname}`; // Generate a unique file name
-    const filePath = path.join(uploadDir, fileName); // Create the full path for the file
-
+  private async uploadFileToCloudinary(file: Express.Multer.File): Promise<string> {
     try {
-      fs.writeFileSync(filePath, file.buffer); // Write the file to the filesystem
-      return `/uploads/${fileName}`; // Return the relative URL to the saved file
+        const uploadResult = await new Promise<any>((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                { resource_type: 'auto' },
+                (error, result) => {
+                    if (error) {
+                        console.error('Cloudinary upload error:', error); // Log the error
+                        return reject(error); // Reject the promise
+                    }
+                    resolve(result); // Resolve the promise with the result
+                }
+            );
+            stream.end(file.buffer); // End the stream with the file buffer
+        });
+
+        return uploadResult.secure_url; // Return the secure URL of the uploaded file
     } catch (error) {
-      throw new InternalServerErrorException('Could not save the file'); // Handle any errors
+        console.error('Error in uploadFileToCloudinary:', error); // Log the error for debugging
+        throw new InternalServerErrorException('Could not upload the file to Cloudinary');
     }
 }
 }
