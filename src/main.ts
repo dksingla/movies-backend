@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({credentials: true,});
   await app.listen(3001);
 }
 bootstrap();

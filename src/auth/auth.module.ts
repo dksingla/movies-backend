@@ -7,14 +7,13 @@ import { AuthController } from './auth.controller'; // Make sure this is importe
 import { AuthResolver } from './auth.resolver';
 import { UsersModule } from '../users/users.module';
 import { MoviesModule } from '../movies/movie.module';
-import { jwtConstants } from './constants';
 @Module({
   imports: [
     UsersModule,
     MoviesModule,
     JwtModule.register({
       global: true,
-      secret: jwtConstants.secret,
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '60s' },
     }),
   ],

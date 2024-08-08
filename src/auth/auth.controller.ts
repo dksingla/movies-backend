@@ -17,15 +17,10 @@ export class AuthController {
       // Call signIn from AuthService
       const { access_token, total, id } = await this.authService.signIn(signInDto.email, signInDto.password);
 
-      // Set the token as an HttpOnly cookie
-      res.cookie('token', access_token, {
-        httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-        secure: false,  // Set to true if using HTTPS
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-      });
+      
 
-      // Return user-related information without the token
-      return res.json({ total, id });
+      
+      return res.json({ total, id , access_token });
     } catch (error) {
       // Handle errors from AuthService
       return res.status(HttpStatus.UNAUTHORIZED).json({
