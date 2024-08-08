@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-// auth.controller.ts
 import { Body, Controller, Post, HttpCode, HttpStatus, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/signin.dto'; // Import the DTO
@@ -15,9 +14,9 @@ export class AuthController {
   async signIn(@Body() signInDto: SignInDto, @Res() res: Response) {
     try {
       // Call signIn from AuthService
-      const { access_token, total, id } = await this.authService.signIn(signInDto.email, signInDto.password);
+      const { accessToken, total, id } = await this.authService.signIn(signInDto.email, signInDto.password);
 
-      return res.json({ total, id , access_token });
+      return res.json({ total, id , accessToken });
     } catch (error) {
       // Handle errors from AuthService
       return res.status(HttpStatus.UNAUTHORIZED).json({

@@ -12,7 +12,7 @@ export class AuthService {
     private moviesService: MoviesService,
   ) {}
 
-  async signIn(email: string, pass: string): Promise<{ access_token: string, total: number ,id:number}> {
+  async signIn(email: string, pass: string): Promise<{ accessToken: string, total: number ,id:number}> {
     const user = await this.usersService.findOne(email);
 
     if (!user || user.password !== pass) {
@@ -24,13 +24,13 @@ export class AuthService {
     }
     const id = user.userId
     const payload = { sub: user.userId, email: user.email };
-    const access_token = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload);
   
     // Fetch movies for the user
     const {  total } = await this.moviesService.findAll(1); // Get the first page of movies
 
     return {
-      access_token,
+      accessToken,
       total,
       id
     };
