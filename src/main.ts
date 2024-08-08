@@ -8,7 +8,7 @@ async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create(AppModule);
   const corsOptions: CorsOptions = {
-    origin:"*", 
+    origin:"https://movies-frontend-six.vercel.app", 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',
   };
