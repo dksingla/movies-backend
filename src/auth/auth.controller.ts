@@ -17,9 +17,6 @@ export class AuthController {
       // Call signIn from AuthService
       const { access_token, total, id } = await this.authService.signIn(signInDto.email, signInDto.password);
 
-      
-
-      
       return res.json({ total, id , access_token });
     } catch (error) {
       // Handle errors from AuthService

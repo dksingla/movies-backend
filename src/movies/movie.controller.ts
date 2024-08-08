@@ -51,7 +51,6 @@ async editMovie(
     @Param('id') id: number,
     @Body('title') title?: string,
     @Body('year') year?: number,
-    @Body('userId') userId?: number, // Optional userId if needed
     @UploadedFile() file?: Express.Multer.File, // Expecting the uploaded file here
 ): Promise<Movie> {
     if (file) {
